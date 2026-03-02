@@ -1,0 +1,80 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 70% 23%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 70% 23%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 70% 23%;
+
+    --primary: 220 100% 23%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 47 100% 60%;
+    --secondary-foreground: 220 70% 23%;
+
+    --muted: 220 20% 95%;
+    --muted-foreground: 220 20% 40%;
+
+    --accent: 47 100% 60%;
+    --accent-foreground: 220 70% 23%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 90%;
+    --input: 220 20% 90%;
+    --ring: 220 100% 50%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-white text-foreground min-h-screen;
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@layer components {
+  .product-card {
+    @apply bg-white rounded-lg shadow-md p-4 transition-transform hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .btn-primary {
+    @apply bg-thenga-blue hover:bg-thenga-lightblue text-white font-bold py-2 px-4 rounded shadow transition-all duration-300;
+  }
+
+  .product-image {
+    @apply w-full h-40 object-contain mb-4;
+  }
+
+  .quantity-control {
+    @apply flex items-center border rounded-md overflow-hidden;
+  }
+
+  .quantity-btn {
+    @apply flex-shrink-0 bg-thenga-lightgray hover:bg-thenga-yellow text-thenga-blue font-bold py-1 px-3 transition-colors;
+  }
+
+  .quantity-input {
+    @apply w-12 text-center py-1 border-x border-thenga-lightgray focus:outline-none focus:ring-1 focus:ring-thenga-blue;
+  }
+  
+  /* Force refresh of styles */
+  .refresh-styles {
+    display: none;
+  }
+}

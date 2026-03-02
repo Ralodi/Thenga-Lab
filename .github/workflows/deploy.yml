@@ -1,0 +1,46 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Build and Deploy
+
+env:
+  BRANCH_NAME: ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
+    - run: npm ci
+    #- run: npm test --no-watch --no-progress --browsers=ChromeHeadless
+    - run: npm run build --if-present
+
+    - name: Install Netlify
+      run: npm install netlify-cli@17.10.1 -g
+
+    - name: Deploy to Netlify
+      run: |
+        prod_flag=""
+        if [ "$BRANCH_NAME" = "main" ]; then prod_flag="--prod"; fi
+          netlify deploy \
+            --dir dist \
+            --site 58be872e-6711-4aba-ae2f-9c782f84b830 \
+            --auth nfp_WyciMd7aDRvfqBFxsNg5JedEBm73mep8c767 \
+            $prod_flag 

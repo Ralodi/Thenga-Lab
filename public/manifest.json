@@ -1,0 +1,36 @@
+
+{
+  "name": "Thenga Bev",
+  "short_name": "ThengaBev",
+  "description": "Simple tavern stock ordering app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8E1",
+  "theme_color": "#FFA500",
+  "icons": [
+    {
+      "src": "/icons/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+        {
+      "src": "/screenshots/screenshot-narrow.png",
+      "sizes": "783x1701",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screenshot-wide.png",
+      "sizes": "2966x1704",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}
