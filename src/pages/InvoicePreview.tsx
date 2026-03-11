@@ -1,6 +1,4 @@
 import React from 'react';
-import { Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface Product {
   id: string;
@@ -15,6 +13,9 @@ interface Product {
 interface OrderItem {
   product: Product;
   quantity: number;
+  selectedSize?: string;
+  variantId?: string;            // NEW: Variant identifier
+  variantPrice?: number;         // NEW: Variant-specific price
 }
 
 interface Customer {
@@ -30,6 +31,11 @@ interface OrderData {
   date: string;
   customer: Customer;
   items: OrderItem[];
+  subtotal: number;
+  deliveryFee: number;
+  distanceKm: number;
+  loyaltyPointsRedeemed?: number;
+  loyaltyRedemptionValue?: number;
   total: number;
 }
 
@@ -41,7 +47,7 @@ interface Props {
 const cell = (widthPercent: number, align: 'left' | 'center' | 'right' = 'left') => ({
   padding: '10px',
   width: `${widthPercent}%`,
-  textAlign: align as any,
+  textAlign: align as 'left' | 'center' | 'right',
   border: '1px solid #ccc'
 });
 
@@ -60,7 +66,6 @@ export const InvoicePreview: React.FC<Props> = ({ orderData, invoiceRef }) => {
         }}
         className="rounded-md shadow-md"
       >
-        {/* HEADER */}
         <div
           style={{
             background: '#FFD700',
@@ -77,9 +82,7 @@ export const InvoicePreview: React.FC<Props> = ({ orderData, invoiceRef }) => {
           <h1 style={{ margin: 0, fontSize: '1.5rem' }}>INVOICE</h1>
         </div>
 
-        {/* BODY */}
         <div style={{ padding: 16 }}>
-          {/* DETAILS */}
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20 }}>
             <div style={{ minWidth: '48%' }}>
               <p><strong>Invoice #:</strong> {orderData.orderId}</p>
@@ -93,7 +96,6 @@ export const InvoicePreview: React.FC<Props> = ({ orderData, invoiceRef }) => {
             </div>
           </div>
 
-          {/* TABLE */}
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
@@ -106,19 +108,48 @@ export const InvoicePreview: React.FC<Props> = ({ orderData, invoiceRef }) => {
               </thead>
               <tbody>
                 {orderData.items.map((item, idx) => {
-                  const total = item.product.price * item.quantity;
+                  // NEW: Use variant price if available
+                  const unitPrice = typeof item.variantPrice === 'number' ? item.variantPrice : item.product.price;
+                  const total = unitPrice * item.quantity;
                   return (
                     <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
                       <td style={cell(40)}>
                         {item.product.name}
+                        {item.selectedSize ? ` (${item.selectedSize})` : ''}
                         {item.product.description ? ` - ${item.product.description}` : ''}
                       </td>
                       <td style={cell(10, 'center')}>{item.quantity}</td>
-                      <td style={cell(20, 'right')}>R{item.product.price.toFixed(2)}</td>
+                      <td style={cell(20, 'right')}>R{unitPrice.toFixed(2)}</td>
                       <td style={cell(20, 'right')}>R{total.toFixed(2)}</td>
                     </tr>
                   );
                 })}
+                <tr>
+                  <td colSpan={3} style={{ padding: 10, textAlign: 'right' }}>
+                    Subtotal:
+                  </td>
+                  <td style={{ padding: 10, textAlign: 'right' }}>
+                    R{orderData.subtotal.toFixed(2)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={3} style={{ padding: 10, textAlign: 'right' }}>
+                    Delivery ({orderData.distanceKm.toFixed(1)} km):
+                  </td>
+                  <td style={{ padding: 10, textAlign: 'right' }}>
+                    R{orderData.deliveryFee.toFixed(2)}
+                  </td>
+                </tr>
+                {Number(orderData.loyaltyPointsRedeemed ?? 0) > 0 && (
+                  <tr>
+                    <td colSpan={3} style={{ padding: 10, textAlign: 'right' }}>
+                      Loyalty Redeem ({Number(orderData.loyaltyPointsRedeemed)} pts):
+                    </td>
+                    <td style={{ padding: 10, textAlign: 'right' }}>
+                      -R{Number(orderData.loyaltyRedemptionValue ?? 0).toFixed(2)}
+                    </td>
+                  </tr>
+                )}
                 <tr>
                   <td colSpan={3} style={{ padding: 10, textAlign: 'right', fontSize: 16, fontWeight: 'bold' }}>
                     Grand Total:
@@ -131,7 +162,6 @@ export const InvoicePreview: React.FC<Props> = ({ orderData, invoiceRef }) => {
             </table>
           </div>
 
-          {/* FOOTER */}
           <div style={{ marginTop: 40, textAlign: 'center', fontStyle: 'italic', color: '#666' }}>
             Thank you for your business!
           </div>

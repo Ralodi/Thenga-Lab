@@ -1,54 +1,81 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
+import { getTrackOrderBadgeClass } from '@/types/orderStatus';
 
 const TrackOrder = () => {
     const { orderId } = useParams();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Fetch the initial order details
     useEffect(() => {
+        if (!orderId) {
+            setError('Missing order id');
+            setLoading(false);
+            return;
+        }
+
         const fetchOrder = async () => {
+            setLoading(true);
             const { data, error } = await supabase
-                .from('Orders') // Assuming your table is called 'orders'
+                .from('Orders')
                 .select('*')
                 .eq('order_id', orderId)
                 .single();
 
             if (data) {
                 setOrder(data);
+                setError(null);
             } else {
                 console.error('Error fetching order:', error);
+                setError(error?.message || 'Failed to load order');
             }
+            setLoading(false);
         };
 
-        fetchOrder();
+        const subscription = supabase
+            .channel(`track-order-${orderId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'Orders',
+                    filter: `order_id=eq.${orderId}`,
+                },
+                (payload) => {
+                    setOrder(payload.new);
+                }
+            )
+            .subscribe();
+
+        void fetchOrder();
+
+        return () => {
+            supabase.removeChannel(subscription);
+        };
     }, [orderId]);
 
-    // If the order data is not available, show a loading message
-    if (!order) {
-        return <p>Loading order details...</p>;
+    if (loading) {
+        return <p className="text-center py-6">Loading order details...</p>;
     }
 
-    const getStatusBadgeClasses = (status: string) => {
-        switch (status) {
-            case 'Created':
-                return 'bg-gray-300 text-gray-800';
-            case 'Acknowledged':
-                return 'bg-blue-500 text-white';
-            case 'Rejected':
-                return 'bg-red-500 text-white';
-            case 'Processing':
-                return 'bg-yellow-500 text-white';
-            case 'Completed':
-                return 'bg-green-500 text-white';
-            default:
-                return 'bg-gray-500 text-white';
-        }
-    };
+    if (error) {
+        return (
+            <div className="max-w-xl mx-auto px-4 py-6">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <p className="text-red-600 font-medium">Failed to load order</p>
+                    <p className="text-sm text-gray-600 mt-1">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
-    // Format the date as requested
+    if (!order) {
+        return <p className="text-center py-6">Order not found.</p>;
+    }
+
     const formattedDate = new Intl.DateTimeFormat('en-GB', {
         day: '2-digit',
         month: 'long',
@@ -56,7 +83,7 @@ const TrackOrder = () => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Local timezone
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     })
         .format(new Date(order.date))
         .replace(',', '')
@@ -89,7 +116,7 @@ const TrackOrder = () => {
                     <p className="text-lg font-medium">
                         <span className="font-semibold">Order Status:</span>
                         <span
-                            className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClasses(order.status)}`}
+                            className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${getTrackOrderBadgeClass(order.status)}`}
                         >
                             {order.status}
                         </span>

@@ -1,11 +1,8 @@
 
-export type Product = {
-  id: string;
-  name: string;  
-  type: string;
-  image: string;
-  description: string;
-  price: number;
-  stock: number;
-  unit: string;
-};
+import { EnhancedProduct, ProductVariant } from '@/types/product';
+
+// For backward compatibility, Product is now an alias for EnhancedProduct
+export type Product = EnhancedProduct;
+
+// Re-export variant type
+export type { ProductVariant };

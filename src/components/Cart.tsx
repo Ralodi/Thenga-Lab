@@ -28,47 +28,56 @@ const Cart: React.FC<CartProps> = ({ onCheckout, isLoggedIn, onLogin }) => {
       <div className="flex-1 overflow-y-auto pr-1">
         <h2 className="text-xl font-bold text-thenga-blue mb-4">Your Cart</h2>
 
-        {items.map((item) => (
-          <div key={item.product.id} className="mb-4">
-            <div className="flex justify-between items-center">
-              <div className="flex-1">
-                <h3 className="font-medium">{item.product.name}</h3>
-                <p className="text-sm text-gray-500">R {item.product.price.toFixed(2)} each</p>
-              </div>
+        {items.map((item) => {
+          // NEW: Use variant price if available, otherwise fall back to product price
+          const itemPrice = typeof item.variantPrice === 'number' ? item.variantPrice : item.product.price;
+          const itemKey = `${item.product.id}-${item.selectedSize ?? ''}-${item.variantId ?? ''}`;
+          
+          return (
+            <div key={itemKey} className="mb-4">
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <h3 className="font-medium">{item.product.name}</h3>
+                  {item.selectedSize && (
+                    <p className="text-xs text-gray-500">Size: {item.selectedSize}</p>
+                  )}
+                  <p className="text-sm text-gray-500">R {itemPrice.toFixed(2)} each</p>
+                </div>
 
-              <div className="flex items-center">
-                <button
-                  className="p-1 bg-thenga-lightgray hover:bg-thenga-yellow rounded-l"
-                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="px-2 py-1 border-y border-thenga-lightgray bg-white min-w-[2.5rem] text-center">
-                  {item.quantity}
-                </span>
-                <button
-                  className="p-1 bg-thenga-lightgray hover:bg-thenga-yellow rounded-r"
-                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
+                <div className="flex items-center">
+                  <button
+                    className="h-9 w-9 flex items-center justify-center bg-thenga-lightgray hover:bg-thenga-yellow rounded-l"
+                    onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.selectedSize, item.variantId)}
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="px-2 py-1 border-y border-thenga-lightgray bg-white min-w-[2.5rem] text-center">
+                    {item.quantity}
+                  </span>
+                  <button
+                    className="h-9 w-9 flex items-center justify-center bg-thenga-lightgray hover:bg-thenga-yellow rounded-r"
+                    onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.selectedSize, item.variantId)}
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
 
-              <div className="ml-4 flex items-center">
-                <span className="font-medium mr-2">
-                  R {(item.product.price * item.quantity).toFixed(2)}
-                </span>
-                <button
-                  onClick={() => removeItem(item.product.id)}
-                  className="text-gray-500 hover:text-red-500"
-                >
-                  <XCircle size={20} />
-                </button>
+                <div className="ml-4 flex items-center">
+                  <span className="font-medium mr-2">
+                    R {(itemPrice * item.quantity).toFixed(2)}
+                  </span>
+                  <button
+                    onClick={() => removeItem(item.product.id, item.selectedSize, item.variantId)}
+                    className="h-9 w-9 flex items-center justify-center text-gray-500 hover:text-red-500"
+                  >
+                    <XCircle size={20} />
+                  </button>
+                </div>
               </div>
+              <Separator className="mt-2" />
             </div>
-            <Separator className="mt-2" />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Fixed Footer */}

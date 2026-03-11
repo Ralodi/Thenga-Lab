@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
+# THENGA
 
-## Project info
+THENGA is a delivery platform with three app surfaces in one React frontend:
 
-**URL**: https://lovable.dev/projects/b65b1fff-6c01-4875-8637-a3b133ba1a25
+- Customer App (`/`)
+- Driver App (`/driver-dashboard`)
+- Admin Dashboard (`/admin-dashboard`)
 
-## How can I edit this code?
+It integrates with Supabase (database, auth, storage, edge functions).
 
-There are several ways of editing your application.
+## Stack
 
-**Use Lovable**
+- Vite + React + TypeScript
+- Tailwind CSS + shadcn/ui
+- Zustand (cart state)
+- Supabase JS client
+- Supabase Edge Functions (`create-order`, `calculate-distance`)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b65b1fff-6c01-4875-8637-a3b133ba1a25) and start prompting.
+## Local Setup
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Install dependencies:
+```bash
+npm install
+```
 
-**Use your preferred IDE**
+2. Create env file:
+```bash
+copy .env.example .env
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. Fill `.env` values for your Supabase project.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Start dev server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+5. Build for production check:
+```bash
+npm run build
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Required Supabase Setup
 
-**Use GitHub Codespaces**
+Run SQL files in Supabase SQL Editor:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `supabase/catalog_phase1.sql`
+- `supabase/offers.sql`
+- `supabase/driver_profiles.sql`
+- `supabase/delivery_proofs.sql`
+- `supabase/loyalty_points.sql`
 
-## What technologies are used for this project?
+Then deploy edge functions with latest code:
 
-This project is built with:
+- `supabase/functions/create-order/index.ts`
+- `supabase/functions/calculate-distance/index.ts`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Key Features
 
-## How can I deploy this project?
+- Area + wholesaler based customer browsing
+- Delivery fee by distance
+- Loyalty points earn + redeem (`R0.33` per point)
+- Bonus campaign points from active offers
+- Driver order acceptance and proof-of-delivery upload
+- Admin product, wholesaler, driver, and offer management
 
-Simply open [Lovable](https://lovable.dev/projects/b65b1fff-6c01-4875-8637-a3b133ba1a25) and click on Share -> Publish.
+## Security Notes
 
-## Can I connect a custom domain to my Lovable project?
+- Do not commit real `.env` files
+- Use `.env.example` for shared config shape
+- Rotate Supabase keys if previously exposed in history
 
-Yes it is!
+## Scripts
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- `npm run dev` - Start development server
+- `npm run build` - Production build
+- `npm run lint` - ESLint checks
+- `npm run preview` - Preview production build
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Production Readiness Checklist
+
+- [ ] All required SQL migrations executed
+- [ ] Edge functions deployed and tested
+- [ ] Test modes disabled in `.env.production`
+- [ ] RLS policies verified for storage uploads
+- [ ] Manual end-to-end tests for customer, driver, admin flows

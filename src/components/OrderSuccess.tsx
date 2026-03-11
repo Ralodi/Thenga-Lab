@@ -1,15 +1,31 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, Home } from 'lucide-react';
+import { ArrowRight, Check, Download, Home } from 'lucide-react';
 
 interface OrderSuccessProps {
   orderId: string;
+  loyaltyPointsRedeemed?: number;
+  loyaltyRedemptionValue?: number;
+  loyaltyPointsEarned?: number;
+  loyaltyBonusPointsEarned?: number;
+  loyaltyPointsTotal?: number | null;
   onBackToHome: () => void;
   onTrackOrder: () => void;
+  onDownloadInvoice: () => void;
 }
 
-const OrderSuccess: React.FC<OrderSuccessProps> = ({ orderId, onBackToHome, onTrackOrder }) => {
+const OrderSuccess: React.FC<OrderSuccessProps> = ({
+  orderId,
+  loyaltyPointsRedeemed,
+  loyaltyRedemptionValue,
+  loyaltyPointsEarned,
+  loyaltyBonusPointsEarned,
+  loyaltyPointsTotal,
+  onBackToHome,
+  onTrackOrder,
+  onDownloadInvoice,
+}) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-8 text-center">
       <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
@@ -29,6 +45,25 @@ const OrderSuccess: React.FC<OrderSuccessProps> = ({ orderId, onBackToHome, onTr
         <br />
         Payment will be collected on delivery.
       </p>
+      {(Number(loyaltyPointsEarned ?? 0) > 0 || loyaltyPointsTotal !== null) && (
+        <div className="bg-blue-50 border border-blue-100 p-3 rounded-md mb-6 text-left">
+          <p className="text-sm text-blue-900 font-semibold">Loyalty Points</p>
+          {Number(loyaltyPointsRedeemed ?? 0) > 0 && (
+            <p className="text-sm text-blue-800">
+              Redeemed: {Number(loyaltyPointsRedeemed)} pts (R {Number(loyaltyRedemptionValue ?? 0).toFixed(2)})
+            </p>
+          )}
+          {Number(loyaltyPointsEarned ?? 0) > 0 && (
+            <p className="text-sm text-blue-800">Earned on this order: {Number(loyaltyPointsEarned)} pts</p>
+          )}
+          {Number(loyaltyBonusPointsEarned ?? 0) > 0 && (
+            <p className="text-sm text-blue-800">Special offer bonus: +{Number(loyaltyBonusPointsEarned)} pts</p>
+          )}
+          {typeof loyaltyPointsTotal === 'number' && (
+            <p className="text-sm text-blue-800">Total points: {loyaltyPointsTotal} pts</p>
+          )}
+        </div>
+      )}
       <div className="flex gap-4 mt-6">
             <Button
               type="button"
@@ -47,6 +82,14 @@ const OrderSuccess: React.FC<OrderSuccessProps> = ({ orderId, onBackToHome, onTr
               onClick={onTrackOrder}
             >
               <ArrowRight className="mr-2 h-4 w-4" /> Track Order
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={onDownloadInvoice}
+            >
+              <Download className="mr-2 h-4 w-4" /> Invoice
             </Button>
           </div>
     </div>
