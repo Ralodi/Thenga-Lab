@@ -8,15 +8,23 @@ const isUuid = (value?: string): value is string =>
 export async function submitOrder(order: Order) {
   const safeUserId = isUuid(order.customer.userId) ? order.customer.userId : undefined;
   const safeAddressId = isUuid(order.customer.addressId) ? order.customer.addressId : undefined;
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData?.session?.access_token;
+  
+  // Refresh session to ensure we have a valid, current access token
+  const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+  const accessToken = session?.access_token;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: supabaseAnonKey,
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
 
   const response = await fetch(`${supabaseUrl}/functions/v1/create-order`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken || supabaseAnonKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       customer_name: order.customer.name,
       location: order.customer.location,
