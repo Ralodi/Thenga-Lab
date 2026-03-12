@@ -11,6 +11,10 @@ export async function submitOrder(order: Order) {
   
   // Refresh session to ensure we have a valid, current access token
   const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+  if (refreshError) {
+    console.error('Session refresh failed:', refreshError);
+    throw new Error('Authentication expired. Please log out and log back in.');
+  }
   const accessToken = session?.access_token;
 
   const headers: Record<string, string> = {
@@ -21,6 +25,8 @@ export async function submitOrder(order: Order) {
   if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`;
   }
+
+  console.log('Submitting order with headers:', { hasAuth: !!accessToken, hasApikey: !!headers.apikey });
 
   const response = await fetch(`${supabaseUrl}/functions/v1/create-order`, {
     method: 'POST',
